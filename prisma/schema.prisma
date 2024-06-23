@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Bibliotecario {
+  Rut                 String   @id
+  Nombre              String
+  Apellido            String
+  Usuario             String
+  Contrasena          String
+  Email               String
+  BibliotecaID        Int
+  Biblioteca          Biblioteca @relation(fields: [BibliotecaID], references: [BibliotecaID])
+}
+
+model Usuario {
+  Rut                 String   @id
+  Nombres             String
+  Apellidos           String
+  Email               String
+  Tipo_usuario        String
+  Prestamos           Prestamos[]
+}
+
+model Biblioteca {
+  BibliotecaID        Int      @id @default(autoincrement())
+  Nombre              String
+  Direccion           String
+  Telefono            String
+  Email               String
+  Bibliotecarios      Bibliotecario[]
+  Libros              Libro[]
+}
+
+model Prestamos {
+  PrestamoID          Int      @id @default(autoincrement())
+  Fecha_Prestamo      DateTime
+  Cantidad_Libros     Int
+  Estado_Prestamo     String
+  Usuario_Rut         String
+  Usuario             Usuario @relation(fields: [Usuario_Rut], references: [Rut])
+  Multa               Multa?
+  DetallePrestamos    DetallePrestamo[]
+}
+
+model Multa {
+  MultaID             Int      @id @default(autoincrement())
+  Deuda               Int
+  Estado_Multa        String
+  Prestamos_PrestamoID Int @unique
+  Prestamos           Prestamos @relation(fields: [Prestamos_PrestamoID], references: [PrestamoID])
+}
+
+model Libro {
+  LibroID             Int      @id @default(autoincrement())
+  Titulo              String
+  Autor               String
+  Editorial           String
+  Ano_Publicacion     Int
+  Copias              Int
+  BibliotecaID        Int
+  Biblioteca          Biblioteca @relation(fields: [BibliotecaID], references: [BibliotecaID])
+  DetallePrestamos    DetallePrestamo[]
+}
+
+model DetallePrestamo {
+  Prestamos_PrestamoID Int
+  Libro_LibroID       Int
+  Estado_Detalle      String
+  Fecha_Devolucion    DateTime
+  Dias_Atraso         Int
+  Prestamos           Prestamos @relation(fields: [Prestamos_PrestamoID], references: [PrestamoID])
+  Libro               Libro @relation(fields: [Libro_LibroID], references: [LibroID])
+  
+  @@id([Prestamos_PrestamoID, Libro_LibroID])
+}
