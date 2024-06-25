@@ -1,0 +1,43 @@
+@font-face {
+    font-family: 'RedHatDisplay';
+    src: url('/fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype');
+}
+
+body {
+    background-image: url('/images/background.jpg');
+    font-family: 'RedHatDisplay';
+}
+
+.nav {
+    background-color: white;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    padding-left: 15px;
+}
+
+#nav-item-dropdown {
+    padding-right: 15px;
+}
+
+.card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+}
+
+.card {
+    text-align: center;
+    box-shadow: 5px 5px 0px 1px gray;
+}
+
+.card .btn {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    width: 100%;
+}
