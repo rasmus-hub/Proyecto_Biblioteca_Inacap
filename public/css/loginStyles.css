@@ -1,0 +1,34 @@
+@font-face {
+    font-family: 'RedHatDisplay';
+    src: url('/fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype');
+}
+
+body {
+    background-image: url('/images/background.jpg');
+    font-family: 'RedHatDisplay';
+}
+
+.nav {
+    background-color: white;
+    height: 100px;
+}
+
+.nav-item {
+    padding-top: 17px;
+    padding-left: 15px;
+}
+
+.login-form {
+    background-color: white;
+    border: 35px solid white;
+    border-radius: 25px;
+    width: 450px;
+    box-shadow: 5px 5px 0px 1px gray;
+    margin: auto;
+    margin-top: 13%;
+}
+
+.form-header {
+    text-align: center;
+    padding-bottom: 2vh;
+}
