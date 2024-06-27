@@ -6,6 +6,7 @@ const session = require('express-session');
 const swal = require('sweetalert2');
 const pc = require('picocolors');
 const prisma = require('./database/dbConexion');
+const routes = require('./public/js/routes')
 
 const PORT = process.argv[2] ?? 3000;
 
@@ -30,39 +31,7 @@ app.use(session({
 }));
 
 // Establecer rutas
-app.get('/login', (req, res) => {
-    res.render('login');
-});
-
-app.get('/', (req, res) => {
-    if (req.session.loggedin) {
-        res.render('index', {
-            login: true,
-            name: req.session.name,
-            lastname: req.session.lastname,
-            email: req.session.email,
-        });
-    } else {
-        res.render('index', {
-            login: false,
-        });
-    }
-});
-
-app.get('/index', (req, res) => {
-    if (req.session.loggedin) {
-        res.render('index', {
-            login: true,
-            name: req.session.name,
-            lastname: req.session.lastname,
-            email: req.session.email,
-        });
-    } else {
-        res.render('index', {
-            login: false,
-        });
-    }
-});
+app.use(routes)
 
 // Login
 app.post('/auth', async (req, res) => {
@@ -112,6 +81,46 @@ app.post('/auth', async (req, res) => {
         });
     }
 });
+
+app.get('/prestamos', async (req, res) => {
+    try {
+        const prestamos = await prisma.prestamos.findMany();
+        res.render('gestionPrestamos', { prestamos });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los préstamos');
+    }
+});
+
+app.get('/api/prestamos', async (req, res) => {
+    try {
+        const prestamos = await prisma.prestamos.findMany();
+        res.json(prestamos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los préstamos');
+    }
+});
+
+app.get('/detallePrestamos', async (req, res) => {
+    try {
+        const detallePrestamos = await prisma.detallePrestamo.findMany();
+        res.render('detallePrestamos', { detallePrestamos });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los detalles de préstamos')
+    }
+});
+
+app.get('/api/detallePrestamos', async (req, res) => {
+    try {
+        const detallePrestamos = await prisma.detallePrestamo.findMany();
+        res.json(detallePrestamos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener los detalles de préstamos')
+    }
+})
 
 // Inicio del servidor
 app.listen(PORT, () => {
