@@ -32,11 +32,43 @@ function renderTable() {
             <td>${new Date(prestamo.Fecha_Prestamo).toLocaleDateString('es-CL')}</td>
             <td>${prestamo.Cantidad_Libros}</td>
             <td>${prestamo.Estado_Prestamo}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="loadDetallePrestamo(${prestamo.PrestamoID})">Ver Detalle</button>
+                <button class="btn btn-danger btn-sm" onclick="updatePrestamo(${prestamo.PrestamoID})">Actualizar</button>
+                <button class="btn btn-danger btn-sm" onclick="deletePrestamo(${prestamo.PrestamoID})">Eliminar</button>
+            </td>
         `;
         tableBody.appendChild(row);
     });
 
     updatePagination();
+}
+
+function loadDetallePrestamo(prestamoID) {
+    fetch(`/api/detallePrestamos/${prestamoID}`)
+        .then(response => response.json())
+        .then(data => {
+            detallePrestamos = data;
+            renderDetalleTable();
+        })
+        .catch(error => console.error('Error fetching detalle prestamos:', error));
+}
+
+function renderDetalleTable() {
+    const tableBody = document.getElementById('detallePrestamoTabla');
+    tableBody.innerHTML = '';
+
+    detallePrestamos.forEach(detallePrestamo => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${detallePrestamo.Prestamos_PrestamoID}</td>
+            <td>${detallePrestamo.Libro_LibroID}</td>
+            <td>${new Date(detallePrestamo.Fecha_Devolucion).toLocaleDateString('es-CL')}</td>
+            <td>${detallePrestamo.Estado_Detalle}</td>
+            <td>${detallePrestamo.Dias_Atraso}</td>
+        `;
+        tableBody.appendChild(row);
+    });
 }
 
 function addPrestamo() {
@@ -120,19 +152,68 @@ async function addDetallePrestamo(prestamoID, index) {
     });
 }
 
-function updatePrestamo() {
-    // Lógica para actualizar un préstamo
-    // Redirigir a una página de formulario o mostrar un modal
+function updatePrestamo(prestamoID) {
+    alertify.dialog('prompt').set({
+        labels: { ok: 'Actualizar', cancel: 'Cancelar' },
+        title: 'Actualizar Préstamo',
+        onok: function () {
+            const cantidadLibros = parseInt(this.elements.content.querySelector('#cantidadLibros').value);
+            const estadoPrestamo = this.elements.content.querySelector('#estadoPrestamo').value;
+
+            fetch(`/api/prestamos/${prestamoID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cantidadLibros, estadoPrestamo }),
+            })
+                .then(response => response.json())
+                .then(updatedPrestamo => {
+                    const index = prestamos.findIndex(p => p.PrestamoID === prestamoID);
+                    prestamos[index] = updatedPrestamo;
+                    renderTable();
+                })
+                .catch(error => console.error('Error updating prestamo:', error));
+        },
+        onshow: function () {
+            this.elements.content.innerHTML = `
+                <div>
+                    <label for="cantidadLibros">Cantidad Libros:</label>
+                    <input type="number" id="cantidadLibros" class="form-control" min="1" max="10">
+                </div>
+                <br>
+                <div>
+                    <label for="estadoPrestamo">Estado Préstamo:</label>
+                    <input type="text" id="estadoPrestamo" class="form-control">
+                </div>
+            `;
+        }
+    }).show();
 }
 
-function deletePrestamo() {
-    // Lógica para eliminar un préstamo
-    // Confirmar y eliminar el préstamo
+function deletePrestamo(prestamoID) {
+    alertify.confirm('Eliminar Préstamo', '¿Estás seguro de que deseas eliminar este préstamo?', function () {
+        fetch(`/api/prestamos/${prestamoID}`, {
+            method: 'DELETE',
+        })
+            .then(response => {
+                if (response.ok) {
+                    prestamos = prestamos.filter(p => p.PrestamoID !== prestamoID);
+                    renderTable();
+                    alertify.success('Préstamo eliminado con éxito');
+                } else {
+                    alertify.error('Error al eliminar el préstamo');
+                }
+            })
+            .catch(error => console.error('Error deleting prestamo:', error));
+    }, function () {
+        alertify.error('Acción cancelada');
+    });
 }
 
 function searchPrestamos() {
     // Lógica para buscar préstamos
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const searchInput = parseInt(document.getElementById('searchInput').value);
     const tableRows = document.querySelectorAll('#prestamoTabla tr');
     tableRows.forEach(row => {
         const cells = row.getElementsByTagName('td');

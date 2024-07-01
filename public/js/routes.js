@@ -143,4 +143,47 @@ router.post('/api/detallePrestamos', async (req, res) => {
     }
 });
 
+// Actualizar un préstamo
+router.put('/api/prestamos/:id', async (req, res) => {
+    try {
+        const prestamoID = parseInt(req.params.id);
+        const { cantidadLibros, estadoPrestamo } = req.body;
+
+        const updatedPrestamo = await prisma.prestamos.update({
+            where: { PrestamoID: prestamoID },
+            data: {
+                Cantidad_Libros: cantidadLibros,
+                Estado_Prestamo: estadoPrestamo,
+            },
+        });
+
+        res.json(updatedPrestamo);
+    } catch (error) {
+        console.error('Error updating prestamo:', error);
+        res.status(500).json({ error: 'Error updating prestamo' });
+    }
+});
+
+// Eliminar un préstamo
+router.delete('/api/prestamos/:id', async (req, res) => {
+    try {
+        const prestamoID = parseInt(req.params.id);
+
+        // Primero, eliminar los registros en detalleprestamo para evitar errores
+        await prisma.detallePrestamo.deleteMany({
+            where: { Prestamos_PrestamoID: prestamoID },
+        });
+
+        // Luego, eliminar el registro en prestamos
+        await prisma.prestamos.delete({
+            where: { PrestamoID: prestamoID },
+        });
+
+        res.status(204).send();
+    } catch (error) {
+        console.error('Error deleting prestamo:', error);
+        res.status(500).json({ error: 'Error deleting prestamo' });
+    }
+});
+
 module.exports = router;

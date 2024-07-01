@@ -62,8 +62,6 @@
             </div>
             <div id="crud-functions">
                 <button class="btn btn-danger" onclick="addPrestamo()"><strong>Agregar</strong></button>
-                <button class="btn btn-danger" onclick="updatePrestamo()"><strong>Actualizar</strong></button>
-                <button class="btn btn-danger" onclick="deletePrestamo()"><strong>Eliminar</strong></button>
                 <a href="/detallePrestamos"><button class="btn btn-danger"><strong>Detalle Préstamo</strong></button></a>
             </div>
         </div>
@@ -90,6 +88,8 @@
                 <% }); %>
             </tbody>
         </table>
+        <!-- Agregar tabla de detalles prestamos en la misma pagina de gestion de prestamos 
+         con funcionalidades para actualizar su estado y agregar libros dentro del prestamo -->
         <nav>
             <ul id="footer" class="pagination justify-content-between">
                 <li class="page-item"><a class="link-secondary link-offset-2 link-opacity-50 link-underline-opacity-0 link-underline-opacity-100-hover" href="#" onclick="previousPage()"><strong>Anterior</strong></a></li>

@@ -21,12 +21,12 @@
     padding-right: 15px;
 }
 
-#search input {
-    margin-left: 3vh;
+.container {
+    width: 50%;
 }
 
-#crud-functions button {
-    margin-right: 3vh;
+#search input {
+    margin-left: 3vh;
 }
 
 .table td, th {
