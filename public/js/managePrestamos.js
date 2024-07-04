@@ -45,13 +45,13 @@ function renderTable() {
 }
 
 function loadDetallePrestamo(prestamoID) {
-    fetch(`/api/detallePrestamos/${prestamoID}`)
+    fetch(`/api/prestamos/${prestamoID}`)
         .then(response => response.json())
         .then(data => {
             detallePrestamos = data;
             renderDetalleTable();
         })
-        .catch(error => console.error('Error fetching detalle prestamos:', error));
+        .catch(error => console.error('Error fetching data:', error));
 }
 
 function renderDetalleTable() {
@@ -212,14 +212,51 @@ function deletePrestamo(prestamoID) {
 }
 
 function searchPrestamos() {
-    // Lógica para buscar préstamos
-    const searchInput = parseInt(document.getElementById('searchInput').value);
-    const tableRows = document.querySelectorAll('#prestamoTabla tr');
-    tableRows.forEach(row => {
-        const cells = row.getElementsByTagName('td');
-        const matches = Array.from(cells).some(cell => cell.innerText.toLowerCase().includes(searchInput));
-        row.style.display = matches ? '' : 'none';
+    const searchType = document.getElementById('searchType').value;
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+    const filteredPrestamos = prestamos.filter(prestamo => {
+        if (searchType === 'prestamoID') {
+            return prestamo.PrestamoID.toString().includes(searchInput);
+        } else if (searchType === 'rut') {
+            return prestamo.Usuario_Rut.toLowerCase().includes(searchInput);
+        }
     });
+
+    renderFilteredTable(filteredPrestamos);
+}
+
+function renderFilteredTable(filteredPrestamos) {
+    const tableBody = document.getElementById('prestamoTabla');
+    tableBody.innerHTML = '';
+
+    filteredPrestamos.forEach(prestamo => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${prestamo.PrestamoID}</td>
+            <td>${prestamo.Usuario_Rut}</td>
+            <td>${new Date(prestamo.Fecha_Prestamo).toLocaleDateString('es-CL')}</td>
+            <td>${prestamo.Cantidad_Libros}</td>
+            <td>${prestamo.Estado_Prestamo}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="loadDetallePrestamo(${prestamo.PrestamoID})">Ver Detalle</button>
+                <button class="btn btn-danger btn-sm" onclick="updatePrestamo(${prestamo.PrestamoID})">Actualizar</button>
+                <button class="btn btn-danger btn-sm" onclick="deletePrestamo(${prestamo.PrestamoID})">Eliminar</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    updatePagination(filteredPrestamos.length);
+}
+
+function updatePagination(filteredCount) {
+    const totalItems = filteredCount || prestamos.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const currentStart = (currentPage - 1) * itemsPerPage + 1;
+    const currentEnd = Math.min(currentPage * itemsPerPage, totalItems);
+
+    document.querySelector('.pagination .page-link').innerText = `${currentStart}-${currentEnd} de ${totalItems}`;
 }
 
 // Paginación anterior
@@ -242,7 +279,6 @@ function nextPage() {
 // Actualizar la paginación
 function updatePagination() {
     const totalItems = prestamos.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
     const currentStart = (currentPage - 1) * itemsPerPage + 1;
     const currentEnd = Math.min(currentPage * itemsPerPage, totalItems);
 

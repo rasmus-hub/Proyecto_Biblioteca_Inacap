@@ -58,6 +58,10 @@
         <div class="d-flex justify-content-between mb-3">
             <div id="search">
                 <a href="/index"><img src="/public/images/back-arrow2.png" alt="atras" height="40" width="60"></a>
+                <select id="searchType" class="form-select d-inline-block w-auto">
+                    <option value="prestamoID">ID Préstamo</option>
+                    <option value="rut">Rut</option>
+                </select>
                 <input class="form-control me-2 d-inline-block w-auto" id="searchInput" type="search" placeholder="Buscar Préstamo" onkeyup="searchPrestamos()" aria-label="Search">
             </div>
             <div id="crud-functions">
@@ -74,6 +78,7 @@
                     <th scope="col">Fecha</th>
                     <th scope="col">Cantidad Libros</th>
                     <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
                 </tr>
             </thead>
             <tbody id="prestamoTabla">
@@ -88,8 +93,18 @@
                 <% }); %>
             </tbody>
         </table>
-        <!-- Agregar tabla de detalles prestamos en la misma pagina de gestion de prestamos 
-         con funcionalidades para actualizar su estado y agregar libros dentro del prestamo -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Prestamo ID</th>
+                    <th scope="col">Libro ID</th>
+                    <th scope="col">Fecha Devolución</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Días Atraso</th>
+                </tr>
+            </thead>
+            <tbody id="detallePrestamoTabla"></tbody>
+        </table>
         <nav>
             <ul id="footer" class="pagination justify-content-between">
                 <li class="page-item"><a class="link-secondary link-offset-2 link-opacity-50 link-underline-opacity-0 link-underline-opacity-100-hover" href="#" onclick="previousPage()"><strong>Anterior</strong></a></li>
