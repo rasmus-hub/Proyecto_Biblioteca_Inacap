@@ -1,4 +1,4 @@
-const prisma = require('/Users/olive/Desktop/Proyectos INACAP/Taller de Desarrollo de Aplicaciones/Actividad 4/Proyecto_Biblioteca_Inacap/database/dbConexion');
+const prisma = require('../../../database/dbConexion');
 
 // Renderizar pagina gestion de prestamos
 const renderGestionPrestamos = async (req, res) => {

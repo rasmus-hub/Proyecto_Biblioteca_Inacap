@@ -19,21 +19,21 @@ async function checkUserRetraso(rut) {
                 Usuario_Rut: rut
             },
             Fecha_Devolucion: {
-                lt: new Date() // Verifica si la Fecha_Devolucion es menor a la fecha actual
+                lt: new Date()
             }
         },
         include: {
-            Prestamos: true
+            Libro: true
         }
     });
-    return retrasos.length > 0;
+    return retrasos;
 }
 
 async function calcularMultas() {
     const prestamos = await prisma.detallePrestamo.findMany({
         where: {
             Fecha_Devolucion: {
-                lt: new Date() // Verifica si la Fecha_Devolucion es menor a la fecha actual
+                lt: new Date()
             }
         },
         include: {
@@ -79,14 +79,62 @@ async function pagarMulta(rut) {
             Estado_Multa: 'Impaga'
         },
         data: {
-            Estado_Multa: 'Pagada'
+            Estado_Multa: 'Pagada',
+            Fecha_Pago: new Date() // Assuming you add this column to track the payment date
         }
     });
 }
 
+async function eliminarMultasPagadas() {
+    const unDiaAntes = new Date();
+    unDiaAntes.setDate(unDiaAntes.getDate() - 1);
+
+    await prisma.multa.deleteMany({
+        where: {
+            Estado_Multa: 'Pagada',
+            Fecha_Pago: {
+                lt: unDiaAntes
+            }
+        }
+    });
+}
+
+async function getUserDeudas(rut) {
+    const deudas = await prisma.multa.findMany({
+        where: {
+            Prestamos: {
+                Usuario_Rut: rut
+            },
+            Estado_Multa: 'Impaga'
+        },
+        include: {
+            Prestamos: {
+                include: {
+                    DetallePrestamos: {
+                        include: {
+                            Libro: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    return deudas.map(deuda => {
+        const detalle = deuda.Prestamos.DetallePrestamos[0]; // Assuming one detail per loan
+        return {
+            libro: detalle.Libro.Titulo,
+            diasAtraso: Math.ceil((new Date() - new Date(detalle.Fecha_Devolucion)) / (1000 * 60 * 60 * 24)),
+            montoDeuda: deuda.Deuda
+        };
+    });
+}
+
 module.exports = {
+    getUserDeudas,
     checkUserMultas,
     checkUserRetraso,
     calcularMultas,
-    pagarMulta
+    pagarMulta,
+    eliminarMultasPagadas
 };

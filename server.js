@@ -8,6 +8,7 @@ const pc = require('picocolors');
 const prisma = require('./database/dbConexion');
 const routes = require('./public/js/routes/routes')
 const deudasRoutes = require('./public/js/routes/deudasRoutes'); // Asegúrate de que la ruta es correcta
+require('./public/js/jobs/cronJobs')
 
 const PORT = process.argv[2] ?? 3000;
 

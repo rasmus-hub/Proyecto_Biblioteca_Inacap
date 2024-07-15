@@ -56,11 +56,14 @@ model Prestamos {
 
 model Multa {
   MultaID             Int      @id @default(autoincrement())
+  Dias_Atraso         Int
   Deuda               Int
   Estado_Multa        String
   Prestamos_PrestamoID Int @unique
   Prestamos           Prestamos @relation(fields: [Prestamos_PrestamoID], references: [PrestamoID])
+  Fecha_Pago          DateTime? // Nueva columna para rastrear la fecha de pago
 }
+
 
 model Libro {
   LibroID             Int      @id @default(autoincrement())
@@ -79,7 +82,6 @@ model DetallePrestamo {
   Libro_LibroID       Int
   Estado_Detalle      String
   Fecha_Devolucion    DateTime
-  Dias_Atraso         Int
   Prestamos           Prestamos @relation(fields: [Prestamos_PrestamoID], references: [PrestamoID])
   Libro               Libro @relation(fields: [Libro_LibroID], references: [LibroID])
   
