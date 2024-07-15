@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Usuario</title>
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <style>
+        @font-face {
+            font-family: 'RedHatDisplay';
+            src: url('fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype');
+        }
+
+        body {
+            background-color: #f5f5f5;
+            font-family: 'RedHatDisplay';
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            margin-bottom: 15px;
+        }
+
+        .info-section div {
+            margin-bottom: 10px;
+        }
+
+        .table-container {
+            margin-bottom: 20px;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
+        .table .btn {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <a class="nav-link active" aria-current="page" href="https://www.inacap.cl" target="_blank"><img
+                        src="images/navbar.png" width="174" alt="inacap"></a>
+            </a>
+            <div class="collapse navbar-collapse justify-content-center">
+                <span class="navbar-text h4">Informe de Usuario</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="info-section">
+            <h3>Información Personal</h3>
+            <div><strong>Nombre:</strong> <span id="user-name">Sebastián Olivera</span></div>
+            <div><strong>RUT:</strong> <span id="user-rut">xx.xxx.xxx-x</span></div>
+            <div><strong>Datos de contacto:</strong> <span id="user-contact">+56 9 4070 8523</span></div>
+        </div>
+
+        <div class="info-section">
+            <h3>Últimos libros en préstamo</h3>
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Título</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Fecha de Entrega</th>
+                            <th scope="col">Fecha de Préstamo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loansTableBody">
+                        <!-- JavaScript will populate this section -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Deudas</h3>
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Título del libro</th>
+                            <th scope="col">Días de retraso</th>
+                            <th scope="col">Monto de la deuda</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debtsTableBody">
+                        <!-- JavaScript will populate this section -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+
+    <script>
+        const userInfo = {
+            name: "Sebastián Olivera",
+            rut: "xx.xxx.xxx-x",
+            contact: "+56 9 4070 8523",
+            loans: [
+                {
+                    title: "Programación Orientada a Objetos",
+                    status: "Vigente",
+                    loanDate: "2024-05-15",
+                    returnDate: "2024-05-22"
+                },
+                {
+                    title: "Metodología desarrollo ágil tomo IV",
+                    status: "Retrasado",
+                    loanDate: "2024-05-10",
+                    returnDate: "2024-05-17"
+                }
+            ],
+            debts: [
+                {
+                    title: "Metodología desarrollo ágil tomo IV",
+                    daysLate: 3,
+                    fine: 3000
+                }
+            ]
+        };
+
+        function populateTables() {
+            let loansTableBody = document.getElementById('loansTableBody');
+            let debtsTableBody = document.getElementById('debtsTableBody');
+
+            userInfo.loans.forEach(loan => {
+                let loanRow = document.createElement('tr');
+                loanRow.innerHTML = `
+                    <td>${loan.title}</td>
+                    <td>${loan.status}</td>
+                    <td>${loan.returnDate}</td>
+                    <td>${loan.loanDate}</td>
+                `;
+                loansTableBody.appendChild(loanRow);
+            });
+
+            userInfo.debts.forEach(debt => {
+                let debtRow = document.createElement('tr');
+                debtRow.innerHTML = `
+                    <td>${debt.title}</td>
+                    <td>${debt.daysLate} días</td>
+                    <td>$${debt.fine} CLP</td>
+                `;
+                debtsTableBody.appendChild(debtRow);
+            });
+        }
+
+        function calculateFine(daysLate) {
+    const finePerDay = 1000;
+    return daysLate * finePerDay;
+}
+        window.onload = function() {
+            populateTables();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
+</body>
+</html>

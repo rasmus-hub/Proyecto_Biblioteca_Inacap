@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Multas</title>
+</head>
+<body>
+    <form id="check-multas-form">
+        <label for="rut">RUT:</label>
+        <input type="text" id="rut" name="rut">
+        <button type="submit">Check Multas</button>
+    </form>
+    <div id="multas-result"></div>
+
+    <form id="check-retraso-form">
+        <label for="rut-retraso">RUT:</label>
+        <input type="text" id="rut-retraso" name="rut-retraso">
+        <button type="submit">Check Retraso</button>
+    </form>
+    <div id="retraso-result"></div>
+
+    <form id="pagar-multas-form">
+        <label for="rut-pago">RUT:</label>
+        <input type="text" id="rut-pago" name="rut-pago">
+        <button type="submit">Pagar Multas</button>
+    </form>
+    <div id="pago-result"></div>
+
+    <script src="../public/js/gestionMultas.js"></script>
+</body>
+</html>

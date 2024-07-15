@@ -1,0 +1,22 @@
+.container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.nav {
+    background-color: white;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    padding-left: 15px;
+}
+
+#nav-item-dropdown {
+    padding-right: 15px;
+}

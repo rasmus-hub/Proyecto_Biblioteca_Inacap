@@ -3,7 +3,6 @@ let currentPage = 1; // Página actual
 let prestamos = []; // Array de datos de préstamos
 let detallePrestamos = []; // Array de datos de detalle prestamos
 
-
 // Fetch de datos desde el servidor
 document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/prestamos')
@@ -284,6 +283,8 @@ function updatePagination() {
 
     document.querySelector('.pagination .page-link').innerText = `${currentStart}-${currentEnd} de ${totalItems}`;
 }
+
+// Aplicar funcion para colocar deudas a prestamos vencidos
 
 // Iniciar la tabla y la paginación
 renderTable()

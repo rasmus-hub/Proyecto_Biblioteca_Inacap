@@ -15,6 +15,7 @@
             font-family: 'RedHatDisplay';
             src: url('/public/fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype');
         }
+        
         body {
             background-color: #ff0000;
             font-family: 'RedHatDisplay';
@@ -25,6 +26,9 @@
     <ul class="nav">
         <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="https://www.inacap.cl" target="_blank"><img src="/public/images/navbar.png" width="174" alt="inacap"></a>
+        </li>
+        <li>
+            <h3>Gestión de Préstamos</h3>
         </li>
         <% if (login) { %>
             <li id="nav-item-dropdown" class="nav-item dropdown">
@@ -66,7 +70,8 @@
             </div>
             <div id="crud-functions">
                 <button class="btn btn-danger" onclick="addPrestamo()"><strong>Agregar</strong></button>
-                <a href="/detallePrestamos"><button class="btn btn-danger"><strong>Detalle Préstamo</strong></button></a>
+                <a href="/detallePrestamos"><button class="btn btn-danger"><strong>Detalle</strong></button></a>
+                <a href="/detallePrestamos"><button class="btn btn-danger"><strong>Informe</strong></button></a>
             </div>
         </div>
         <hr>

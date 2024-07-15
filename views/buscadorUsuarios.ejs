@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info Usuario</title>
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="/public/css/usuariosStyles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <style>
+        @font-face {
+            font-family: 'RedHatDisplay';
+            src: url('/public/fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype');
+        }
+
+        body {
+            background-color: #ff0000;
+            font-family: 'RedHatDisplay';
+        }
+    </style>
+</head>
+
+<body>
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="https://www.inacap.cl" target="_blank"><img src="/public/images/navbar.png" width="174" alt="inacap"></a>
+        </li>
+        <li>
+            <h3>Buscador de Usuarios</h3>
+        </li>
+        <% if (login) { %>
+            <li id="nav-item-dropdown" class="nav-item dropdown">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-white btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Tu Perfil
+                    </button>
+                    <div class="dropdown-menu text-center">
+                        <img src="/public/images/user.png" alt="imagen usuario" width="90" height="90">
+                        <a class="dropdown-item" href="#"><%= name %> <%= lastname %></a>
+                        <a class="dropdown-item" href="#"><%= email %></a>
+                        <hr class="dropdown-divider">
+                        <a class="dropdown-item" href="/login">Cerrar Sesión</a>
+                    </div>
+                </div>
+            </li>
+        <% } else { %>
+            <li id="nav-item-dropdown" class="nav-item dropdown">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-white btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sesión no iniciada
+                    </button>
+                    <div class="dropdown-menu text-center">
+                        <a class="dropdown-item" href="/login">Iniciar Sesión</a>
+                    </div>
+                </div>
+            </li>
+        <% } %>
+    </ul>
+
+    <div class="main-container">
+        <div class="container user-info-container">
+            <div class="user-info">
+                <h4>Información Usuario</h4>
+                <hr>
+                    <img src="/public/images/user2.png" alt="usuario" width="300" style="margin-left: 5%;">
+                <hr>
+                <div>
+                    <span id="user-rut" style="margin-right: 30%;"><%= rut_Usuario %></span>
+                    <span id="user-name"><%= nombreUsuario %></span>
+                </div>
+                <hr>
+                <div>
+                    <span id="user-email"><%= emailUsuario %></span>
+                </div>
+                <hr>
+                <div>
+                    <span id="user-number"><%= tipoUsuario %></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container prestamos-container">
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <h5>
+                            <ul style="list-style: none; margin: 0%; padding: 0%; display: inline-flex;">
+                                <li style="margin-top: 10%;">Libros Prestados</li>
+                                <li><a href="/index" style="position: fixed; right: 42vh;"><img src="/public/images/back-arrow2.png" alt="atras" height="40" width="60"></a></li>
+                            </ul>
+                        </h5>
+                        <hr>
+                        <tr>
+                            <th scope="col">Libro</th>
+                            <th scope="col">Fecha Préstamo</th>
+                            <th scope="col">Fecha Devolución</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deudasPrestamosTabla">
+                        <% if (prestamos.length > 0) { %>
+                            <% prestamos.forEach(prestamo => { %>
+                                <% prestamo.DetallePrestamos.forEach(detalle => { %>
+                                    <tr>
+                                        <td><%= detalle.Libro.Titulo %></td>
+                                        <td><%= new Date(prestamo.Fecha_Prestamo).toLocaleDateString('es-CL') %></td>
+                                        <td><%= new Date(detalle.Fecha_Devolucion).toLocaleDateString('es-CL') %></td>
+                                        <td><%= detalle.Estado_Detalle %></td>
+                                    </tr>
+                                <% }) %>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4">No hay prestamos.</td>
+                            </tr>
+                        <% } %>                        
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <table class="table table-striped">
+                    <thead>
+                        <h5>Deudas</h5>
+                        <hr>
+                        <tr>
+                            <th scope="col">Libro</th>
+                            <th scope="col">Días Atraso</th>
+                            <th scope="col">Monto Deuda</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deudasTabla">
+                        <% if (deudas.length > 0) { %>
+                            <% deudas.forEach(deuda => { %>
+                                <tr>
+                                    <td><%= deuda.libro %></td>
+                                    <td><%= deuda.diasAtraso %></td>
+                                    <td><%= deuda.montoDeuda %></td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="3">No hay deudas.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>                      
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+    <script src="/public/js/managers/manageUsuarios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
+</body>
+</html>

@@ -1,5 +1,3 @@
-const express = require('express');
-const router = express.Router();
 const prisma = require('/Users/olive/Desktop/Proyectos INACAP/Taller de Desarrollo de Aplicaciones/Actividad 4/Proyecto_Biblioteca_Inacap/database/dbConexion');
 
 // Renderizar pagina gestion de prestamos
@@ -67,16 +65,46 @@ const addPrestamo = async (req, res) => {
         const now = new Date();
         const chileDate = new Date(now.toLocaleDateString('en-US', { timeZone: chileTimeZone }));
 
-        const nuevoPrestamo = await prisma.prestamos.create({
-            data: {
-                Fecha_Prestamo: chileDate,
-                Cantidad_Libros: cantidadLibros,
-                Estado_Prestamo: 'pendiente',
-                Usuario_Rut: rut,
+        let tipoUsuario;
+        const tipoUsuarioResult = await prisma.usuario.findFirst({
+            where: {
+                Rut: rut
             },
+            select: {
+                Tipo_usuario: true
+            }
         });
 
-        res.json(nuevoPrestamo);
+        tipoUsuario = tipoUsuarioResult.Tipo_usuario;
+
+        if (tipoUsuario == "alumno" && cantidadLibros <= 4) {
+            const nuevoPrestamo = await prisma.prestamos.create({
+                data: {
+                    Fecha_Prestamo: chileDate,
+                    Cantidad_Libros: cantidadLibros,
+                    Estado_Prestamo: 'pendiente',
+                    Usuario_Rut: rut,
+                },
+            });
+
+            res.json(nuevoPrestamo);
+        } else {
+            if (tipoUsuario == "docente") {
+                const nuevoPrestamo = await prisma.prestamos.create({
+                    data: {
+                        Fecha_Prestamo: chileDate,
+                        Cantidad_Libros: cantidadLibros,
+                        Estado_Prestamo: 'pendiente',
+                        Usuario_Rut: rut,
+                    },
+                });
+
+                res.json(nuevoPrestamo);
+            } else {
+                console.error('No se puede crear un prestamo para alumno de más de 4 libros');
+            }
+        }
+
     } catch (error) {
         console.error('Error creating prestamo:', error);
         res.status(500).json({ error: 'Error creating prestamo' });
@@ -88,25 +116,64 @@ const addDetallePrestamo = async (req, res) => {
     try {
         const { prestamoID, libro_id } = req.body;
 
+        let tipoUsuario;
+
+        const rutResult = await prisma.prestamos.findFirst({
+            where: {
+                PrestamoID: prestamoID
+            },
+            select: {
+                Usuario_Rut: true
+            }
+        });
+
+        if (rutResult) {
+            const rut = rutResult.Usuario_Rut;
+
+            const tipoUsuarioResult = await prisma.usuario.findFirst({
+                where: {
+                    Rut: rut
+                },
+                select: {
+                    Tipo_usuario: true
+                }
+            });
+
+            if (tipoUsuarioResult) {
+                tipoUsuario = tipoUsuarioResult.Tipo_usuario;
+            } else {
+                console.log("Usuario no encontrado.");
+            }
+        } else {
+            console.log("Préstamo no encontrado.");
+        }
+
         const chileTimeZone = 'America/Santiago';
         const now = new Date();
         const chileDate = new Date(now.toLocaleDateString('en-US', { timeZone: chileTimeZone }));
 
         // Se le agregan 7 días más a la fecha
-        const chileDatePlus7 = new Date(chileDate);
-        chileDatePlus7.setDate(chileDatePlus7.getDate() + 7);
+        let chileDatePlus;
+        if (tipoUsuario == "alumno") {
+            chileDatePlus = new Date(chileDate);
+            chileDatePlus.setDate(chileDatePlus.getDate() + 7);
+        } else {
+            chileDatePlus = new Date(chileDate);
+            chileDatePlus.setDate(chileDatePlus.getDate() + 20);
+        }
 
         const nuevoDetallePrestamo = await prisma.detallePrestamo.create({
             data: {
                 Prestamos_PrestamoID: prestamoID,
                 Libro_LibroID: libro_id,
                 Estado_Detalle: 'pendiente',
-                Fecha_Devolucion: chileDatePlus7,
+                Fecha_Devolucion: chileDatePlus,
                 Dias_Atraso: 0,
             },
         });
 
         res.json(nuevoDetallePrestamo);
+
     } catch (error) {
         console.error('Error creating detalle prestamo:', error);
         res.status(500).json({ error: 'Error creating detalle prestamo' });
@@ -159,7 +226,6 @@ const deletePrestamo = async (req, res) => {
 // Obtener detalle prestamos segun el prestamo que se quiera ver
 const getDetallePrestamosForPrestamo = async (req, res) => {
     try {
-
         const prestamoID = parseInt(req.params.id);
 
         // Buscar los detalle prestamos de ese prestamo
