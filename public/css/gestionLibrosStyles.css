@@ -21,33 +21,12 @@
     padding-right: 15px;
 }
 
-.main-container {
-    width: 75%;
-    display: flex;
-    margin: auto;
-    margin-top: 5%;
-}
-
 .container {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
+    width: 50%;
 }
 
-.user-info-container {
-    width: 30%;
-}
-
-.user-info div {
-    margin-bottom: 10px;
-}
-
-.prestamos-container {
-    width: 62%;
-}
-
-.table-container {
-    margin: auto;
+#search input {
+    margin-left: 3vh;
 }
 
 .table td, th {

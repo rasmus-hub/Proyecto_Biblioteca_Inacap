@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Préstamos</title>
+    <title>Gestión de Libros</title>
     <link rel="icon" type="image/x-icon" href="/public/images/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="/public/css/gestionPrestamosStyles.css">
+    <link rel="stylesheet" href="/public/css/gestionLibrosStyles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
     <style>
@@ -28,7 +28,7 @@
             <a class="nav-link active" aria-current="page" href="https://www.inacap.cl" target="_blank"><img src="/public/images/navbar.png" width="174" alt="inacap"></a>
         </li>
         <li>
-            <h3>Gestión de Préstamos</h3>
+            <h3>Gestión de Libros</h3>
         </li>
         <% if (login) { %>
             <li id="nav-item-dropdown" class="nav-item dropdown">
@@ -63,15 +63,13 @@
             <div id="search">
                 <a href="/index"><img src="/public/images/back-arrow2.png" alt="atras" height="40" width="60"></a>
                 <select id="searchType" class="form-select d-inline-block w-auto">
-                    <option value="prestamoID">ID Préstamo</option>
-                    <option value="rut">Rut</option>
+                    <option value="libroID">ID Libro</option>
+                    <option value="titulo">Título</option>
                 </select>
-                <input class="form-control me-2 d-inline-block w-auto" id="searchInput" type="search" placeholder="Buscar Préstamo" onkeyup="searchPrestamos()" aria-label="Search">
+                <input class="form-control me-2 d-inline-block w-auto" id="searchInput" type="search" placeholder="Buscar Libro" onkeyup="searchLibros()" aria-label="Search">
             </div>
             <div id="crud-functions">
-                <button class="btn btn-danger" onclick="addPrestamo()"><strong>Agregar</strong></button>
-                <a href="/detallePrestamos"><button class="btn btn-danger"><strong>Detalle</strong></button></a>
-                <a href="/detallePrestamos"><button class="btn btn-danger"><strong>Informe</strong></button></a>
+                <button class="btn btn-danger" onclick="addLibro()"><strong>Agregar</strong></button>
             </div>
         </div>
         <hr>
@@ -79,35 +77,26 @@
             <thead>
                 <tr>
                     <th scope="col">ID</th>
-                    <th scope="col">Rut</th>
-                    <th scope="col">Fecha</th>
-                    <th scope="col">Cantidad Libros</th>
-                    <th scope="col">Estado</th>
+                    <th scope="col">Título</th>
+                    <th scope="col">Autor</th>
+                    <th scope="col">Editorial</th>
                     <th scope="col">Acciones</th>
                 </tr>
             </thead>
-            <tbody id="prestamoTabla">
-                <% prestamos.forEach(prestamo => { %>
+            <tbody id="libroTabla">
+                <% libros.forEach(libro => { %>
                     <tr>
-                        <td><%= prestamo.PrestamoID %></td>
-                        <td><%= prestamo.Usuario_Rut %></td>
-                        <td><%= new Date(prestamo.Fecha_Prestamo).toLocaleDateString('es-CL') %></td>
-                        <td><%= prestamo.Cantidad_Libros %></td>
-                        <td><%= prestamo.Estado_Prestamo %></td>
+                        <td><%= libro.LibroID %></td>
+                        <td><%= libro.Titulo %></td>
+                        <td><%= libro.Autor %></td>
+                        <td><%= libro.Editorial %></td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="updateLibro(<%= libro.LibroID %>)">Actualizar</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteLibro(<%= libro.LibroID %>)">Eliminar</button>
+                        </td>
                     </tr>
                 <% }); %>
             </tbody>
-        </table>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Prestamo ID</th>
-                    <th scope="col">Libro ID</th>
-                    <th scope="col">Fecha Devolución</th>
-                    <th scope="col">Estado</th>
-                </tr>
-            </thead>
-            <tbody id="detallePrestamoTabla"></tbody>
         </table>
         <nav>
             <ul id="footer" class="pagination justify-content-between">
@@ -118,7 +107,7 @@
         </nav>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
-    <script src="/public/js/managers/managePrestamos.js"></script>
+    <script src="/public/js/managers/manageLibros.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>

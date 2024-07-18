@@ -7,7 +7,7 @@ const swal = require('sweetalert2');
 const pc = require('picocolors');
 const prisma = require('./database/dbConexion');
 const routes = require('./public/js/routes/routes')
-const deudasRoutes = require('./public/js/routes/deudasRoutes'); // Asegúrate de que la ruta es correcta
+const { calcularMultas } = require('./public/js/controllers/deudasController')
 require('./public/js/jobs/cronJobs')
 
 const PORT = process.argv[2] ?? 3000;
@@ -84,10 +84,11 @@ app.post('/auth', async (req, res) => {
     }
 });
 
-app.use('/deudas', deudasRoutes);
-
-app.get('/gestion-multas', (req, res) => {
-    res.render('gestionMultas');
+// Ejecutar la función calcularMultas al iniciar el servidor
+calcularMultas().then(() => {
+    console.log('Multas calculadas y actualizadas al inicio del servidor.');
+}).catch((error) => {
+    console.error('Error al calcular y actualizar multas al inicio del servidor:', error);
 });
 
 // Inicio del servidor

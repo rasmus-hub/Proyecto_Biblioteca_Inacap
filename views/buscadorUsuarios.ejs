@@ -65,7 +65,7 @@
             <div class="user-info">
                 <h4>Información Usuario</h4>
                 <hr>
-                    <img src="/public/images/user2.png" alt="usuario" width="300" style="margin-left: 5%;">
+                    <img src="/public/images/user2.png" alt="usuario" width="300" style="display: flex; margin-left: 9%;">
                 <hr>
                 <div>
                     <span id="user-rut" style="margin-right: 30%;"><%= rut_Usuario %></span>
@@ -89,7 +89,7 @@
                         <h5>
                             <ul style="list-style: none; margin: 0%; padding: 0%; display: inline-flex;">
                                 <li style="margin-top: 10%;">Libros Prestados</li>
-                                <li><a href="/index" style="position: fixed; right: 42vh;"><img src="/public/images/back-arrow2.png" alt="atras" height="40" width="60"></a></li>
+                                <li><a href="/index" style="position: fixed; right: 29vh;"><img src="/public/images/back-arrow2.png" alt="atras" height="40" width="60"></a></li>
                             </ul>
                         </h5>
                         <hr>
@@ -98,9 +98,10 @@
                             <th scope="col">Fecha Préstamo</th>
                             <th scope="col">Fecha Devolución</th>
                             <th scope="col">Estado</th>
+                            <th scope="col">Acción</th>
                         </tr>
                     </thead>
-                    <tbody id="deudasPrestamosTabla">
+                    <tbody id="prestamosTabla">
                         <% if (prestamos.length > 0) { %>
                             <% prestamos.forEach(prestamo => { %>
                                 <% prestamo.DetallePrestamos.forEach(detalle => { %>
@@ -109,6 +110,14 @@
                                         <td><%= new Date(prestamo.Fecha_Prestamo).toLocaleDateString('es-CL') %></td>
                                         <td><%= new Date(detalle.Fecha_Devolucion).toLocaleDateString('es-CL') %></td>
                                         <td><%= detalle.Estado_Detalle %></td>
+                                        <td>
+                                            <button class="btn btn-danger" onclick="devolverLibro(<%= detalle.Libro_LibroID %>, <%= prestamo.PrestamoID %>)">Devolver</button>
+                                            <% if (tipoUsuario === 'alumno' && detalle.Renovado !== 'Si') { %>
+                                                <button class="btn btn-danger" onclick="solicitarProrroga(<%= detalle.Libro_LibroID %>, <%= prestamo.PrestamoID %>, 'estudiante')">Solicitar Prórroga</button>
+                                            <% } else if (tipoUsuario === 'docente' && detalle.NumeroRenovaciones < 3) { %>
+                                                <button class="btn btn-danger" onclick="solicitarProrroga(<%= detalle.Libro_LibroID %>, <%= prestamo.PrestamoID %>, 'docente')">Solicitar Prórroga</button>
+                                            <% } %>
+                                        </td>
                                     </tr>
                                 <% }) %>
                             <% }) %>
@@ -117,7 +126,7 @@
                                 <td colspan="4">No hay prestamos.</td>
                             </tr>
                         <% } %>                        
-                    </tbody>
+                    </tbody>                    
                 </table>
             </div>
 
@@ -137,7 +146,7 @@
                             <% deudas.forEach(deuda => { %>
                                 <tr>
                                     <td><%= deuda.libro %></td>
-                                    <td><%= deuda.diasAtraso %></td>
+                                    <td><%= deuda.montoDeuda / 1000 %></td>
                                     <td><%= deuda.montoDeuda %></td>
                                 </tr>
                             <% }); %>

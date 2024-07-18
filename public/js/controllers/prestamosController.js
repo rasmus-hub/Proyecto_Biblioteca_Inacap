@@ -65,7 +65,7 @@ const addPrestamo = async (req, res) => {
         const now = new Date();
         const chileDate = new Date(now.toLocaleDateString('en-US', { timeZone: chileTimeZone }));
 
-        let tipoUsuario;
+        let tipoUsuario = "";
         const tipoUsuarioResult = await prisma.usuario.findFirst({
             where: {
                 Rut: rut
@@ -82,7 +82,7 @@ const addPrestamo = async (req, res) => {
                 data: {
                     Fecha_Prestamo: chileDate,
                     Cantidad_Libros: cantidadLibros,
-                    Estado_Prestamo: 'pendiente',
+                    Estado_Prestamo: 'Prestado',
                     Usuario_Rut: rut,
                 },
             });
@@ -94,7 +94,7 @@ const addPrestamo = async (req, res) => {
                     data: {
                         Fecha_Prestamo: chileDate,
                         Cantidad_Libros: cantidadLibros,
-                        Estado_Prestamo: 'pendiente',
+                        Estado_Prestamo: 'Prestado',
                         Usuario_Rut: rut,
                     },
                 });
@@ -115,6 +115,15 @@ const addPrestamo = async (req, res) => {
 const addDetallePrestamo = async (req, res) => {
     try {
         const { prestamoID, libro_id } = req.body;
+
+        // Verificar si el préstamo existe
+        const prestamoExistente = await prisma.prestamos.findUnique({
+            where: { PrestamoID: prestamoID },
+        });
+
+        if (!prestamoExistente) {
+            return res.status(404).json({ error: 'El préstamo especificado no existe' });
+        }
 
         let tipoUsuario;
 
@@ -166,9 +175,9 @@ const addDetallePrestamo = async (req, res) => {
             data: {
                 Prestamos_PrestamoID: prestamoID,
                 Libro_LibroID: libro_id,
-                Estado_Detalle: 'pendiente',
+                Estado_Detalle: 'Prestado',
                 Fecha_Devolucion: chileDatePlus,
-                Dias_Atraso: 0,
+                Renovado: "No",
             },
         });
 

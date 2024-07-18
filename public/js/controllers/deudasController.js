@@ -1,60 +1,104 @@
-const prisma = require('/Users/olive/Desktop/Proyectos INACAP/Taller de Desarrollo de Aplicaciones/Actividad 4/Proyecto_Biblioteca_Inacap/database/dbConexion');
+const prisma = require('../../../database/dbConexion');
 
-async function checkUserMultas(rut) {
-    const multas = await prisma.multa.findMany({
-        where: {
-            Prestamos: {
-                Usuario_Rut: rut
+// Renderizar pagina gestion de multas
+const renderGestionMultas = async (req, res) => {
+    try {
+        const multas = await prisma.multa.findMany({
+            include: {
+                Prestamos: true,
             },
-            Estado_Multa: 'Impaga'
-        }
-    });
-    return multas.length > 0;
-}
+        });
+        res.render('gestionMultas', {
+            multas,
+            login: true,
+            name: req.session.name,
+            lastname: req.session.lastname,
+            email: req.session.email,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al obtener las multas');
+    }
+};
 
-async function checkUserRetraso(rut) {
-    const retrasos = await prisma.detallePrestamo.findMany({
-        where: {
-            Prestamos: {
-                Usuario_Rut: rut
+// Obtener todas las multas
+const getMultas = async (req, res) => {
+    try {
+        const multas = await prisma.multa.findMany({
+            include: {
+                Prestamos: true,
             },
-            Fecha_Devolucion: {
-                lt: new Date()
-            }
-        },
-        include: {
-            Libro: true
-        }
-    });
-    return retrasos;
-}
+        });
+        res.json(multas);
+    } catch (error) {
+        console.error('Error fetching multas:', error);
+        res.status(500).json({ error: 'Error fetching multas' });
+    }
+};
 
 async function calcularMultas() {
-    const prestamos = await prisma.detallePrestamo.findMany({
+    const prestamos = await prisma.prestamos.findMany({
         where: {
-            Fecha_Devolucion: {
-                lt: new Date()
+            DetallePrestamos: {
+                some: {
+                    Fecha_Devolucion: {
+                        lt: new Date()
+                    }, // Solo prestamos que aún no han sido marcados como devueltos o no devueltos
+                }
             }
         },
         include: {
-            Prestamos: true
+            DetallePrestamos: true
         }
     });
 
-    for (const detalle of prestamos) {
-        const diasRetraso = Math.ceil((new Date() - new Date(detalle.Fecha_Devolucion)) / (1000 * 60 * 60 * 24));
+    for (const prestamo of prestamos) {
+        let sumMultas = 0;
+        let totalDiasRetraso = 0;
+
+        for (const detalle of prestamo.DetallePrestamos) {
+            const diasRetraso = Math.ceil((new Date() - new Date(detalle.Fecha_Devolucion)) / (1000 * 60 * 60 * 24));
+            if (diasRetraso > 0) {
+                sumMultas += diasRetraso * 1000; // Ajusta el monto de la multa por día de retraso
+                totalDiasRetraso += diasRetraso;
+
+                // Actualizar Estado_Detalle a 'No Devuelto' si está atrasado
+                await prisma.detallePrestamo.update({
+                    where: {
+                        Prestamos_PrestamoID_Libro_LibroID: {
+                            Prestamos_PrestamoID: detalle.Prestamos_PrestamoID,
+                            Libro_LibroID: detalle.Libro_LibroID
+                        }
+                    },
+                    data: {
+                        Estado_Detalle: 'No Devuelto'
+                    }
+                });
+            }
+        }
+
+        await prisma.prestamos.update({
+            where: {
+                PrestamoID: prestamo.PrestamoID
+            },
+            data: {
+                Estado_Prestamo: 'No Devuelto'
+            }
+        });
+
         const multaExistente = await prisma.multa.findFirst({
             where: {
-                Prestamos_PrestamoID: detalle.Prestamos_PrestamoID
+                Prestamos_PrestamoID: prestamo.PrestamoID
             }
         });
 
         if (!multaExistente) {
             await prisma.multa.create({
                 data: {
-                    Deuda: diasRetraso * 1000,
+                    Deuda: sumMultas,
                     Estado_Multa: 'Impaga',
-                    Prestamos_PrestamoID: detalle.Prestamos_PrestamoID
+                    Prestamos_PrestamoID: prestamo.PrestamoID,
+                    Dias_Atraso: totalDiasRetraso,
                 }
             });
         } else {
@@ -63,27 +107,95 @@ async function calcularMultas() {
                     MultaID: multaExistente.MultaID
                 },
                 data: {
-                    Deuda: diasRetraso * 1000
+                    Deuda: sumMultas,
+                    Dias_Atraso: totalDiasRetraso,
                 }
             });
         }
     }
 }
 
-async function pagarMulta(rut) {
-    await prisma.multa.updateMany({
-        where: {
-            Prestamos: {
-                Usuario_Rut: rut
+// Función para actualizar el estado de la deuda
+const updateDeuda = async (req, res) => {
+    const { deudaID } = req.params;
+    const { estadoMulta, fechaPago } = req.body;
+
+    const chileTimeZone = 'America/Santiago';
+    const now = new Date();
+    const chileDate = new Date(now.toLocaleDateString('en-US', { timeZone: chileTimeZone }));
+
+    try {
+        const deuda = await prisma.multa.findFirst({
+            where: {
+                MultaID: parseInt(deudaID)
             },
-            Estado_Multa: 'Impaga'
-        },
-        data: {
-            Estado_Multa: 'Pagada',
-            Fecha_Pago: new Date() // Assuming you add this column to track the payment date
+            include: {
+                Prestamos: true,
+            }
+        });
+
+        if (!deuda) {
+            return res.status(404).json({ message: 'Deuda no encontrada' });
         }
-    });
-}
+
+        const updatedDeuda = await prisma.multa.update({
+            where: { MultaID: parseInt(deudaID) },
+            data: {
+                Estado_Multa: estadoMulta,
+                Fecha_Pago: chileDate,
+            },
+            include: {
+                Prestamos: true,
+            }
+        });
+
+        res.json(updatedDeuda);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al actualizar la deuda' });
+    }
+};
+
+// Función para pagar la deuda (actualizar su estado a "Pagada")
+const payDeuda = async (req, res) => {
+    const { deudaID } = req.params;
+
+    const chileTimeZone = 'America/Santiago';
+    const now = new Date();
+    const chileDate = new Date(now.toLocaleDateString('en-US', { timeZone: chileTimeZone }));
+
+    try {
+        const deuda = await prisma.multa.findFirst({
+            where: {
+                MultaID: parseInt(deudaID)
+            },
+            include: {
+                Prestamos: true,
+            }
+        });
+        if (!deuda) {
+            return res.status(404).json({ message: 'Deuda no encontrada' });
+        }
+
+        // Actualiza el estado de la deuda a "Pagada"
+        const updatedDeuda = await prisma.multa.update({
+            where: { MultaID: parseInt(deudaID) },
+            data: {
+                Estado_Multa: "Pagada",
+                Fecha_Pago: chileDate
+            },
+            include: {
+                Prestamos: true,
+            }
+        });
+
+        res.json(updatedDeuda);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al pagar la deuda' });
+    }
+};
+
 
 async function eliminarMultasPagadas() {
     const unDiaAntes = new Date();
@@ -99,42 +211,11 @@ async function eliminarMultasPagadas() {
     });
 }
 
-async function getUserDeudas(rut) {
-    const deudas = await prisma.multa.findMany({
-        where: {
-            Prestamos: {
-                Usuario_Rut: rut
-            },
-            Estado_Multa: 'Impaga'
-        },
-        include: {
-            Prestamos: {
-                include: {
-                    DetallePrestamos: {
-                        include: {
-                            Libro: true
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    return deudas.map(deuda => {
-        const detalle = deuda.Prestamos.DetallePrestamos[0]; // Assuming one detail per loan
-        return {
-            libro: detalle.Libro.Titulo,
-            diasAtraso: Math.ceil((new Date() - new Date(detalle.Fecha_Devolucion)) / (1000 * 60 * 60 * 24)),
-            montoDeuda: deuda.Deuda
-        };
-    });
-}
-
 module.exports = {
-    getUserDeudas,
-    checkUserMultas,
-    checkUserRetraso,
+    renderGestionMultas,
+    getMultas,
     calcularMultas,
-    pagarMulta,
-    eliminarMultasPagadas
+    updateDeuda,
+    payDeuda,
+    eliminarMultasPagadas,
 };

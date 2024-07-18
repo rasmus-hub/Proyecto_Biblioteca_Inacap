@@ -64,7 +64,6 @@ function renderDetalleTable() {
             <td>${detallePrestamo.Libro_LibroID}</td>
             <td>${new Date(detallePrestamo.Fecha_Devolucion).toLocaleDateString('es-CL')}</td>
             <td>${detallePrestamo.Estado_Detalle}</td>
-            <td>${detallePrestamo.Dias_Atraso}</td>
         `;
         tableBody.appendChild(row);
     });
@@ -211,8 +210,8 @@ function deletePrestamo(prestamoID) {
 }
 
 function searchPrestamos() {
-    const searchType = document.getElementById('searchType').value;
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const searchType = document.getElementById('searchType').value;
 
     const filteredPrestamos = prestamos.filter(prestamo => {
         if (searchType === 'prestamoID') {
@@ -283,8 +282,6 @@ function updatePagination() {
 
     document.querySelector('.pagination .page-link').innerText = `${currentStart}-${currentEnd} de ${totalItems}`;
 }
-
-// Aplicar funcion para colocar deudas a prestamos vencidos
 
 // Iniciar la tabla y la paginación
 renderTable()

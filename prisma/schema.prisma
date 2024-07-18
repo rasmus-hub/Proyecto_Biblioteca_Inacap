@@ -82,6 +82,8 @@ model DetallePrestamo {
   Libro_LibroID       Int
   Estado_Detalle      String
   Fecha_Devolucion    DateTime
+  Renovado            String // Nuevo atributo para rastrear las renovaciones
+  NumeroRenovaciones  Int @default(0)
   Prestamos           Prestamos @relation(fields: [Prestamos_PrestamoID], references: [PrestamoID])
   Libro               Libro @relation(fields: [Libro_LibroID], references: [LibroID])
   

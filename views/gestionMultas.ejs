@@ -1,36 +1,113 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Multas</title>
+    <link rel="icon" type="image/x-icon" href="/public/images/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="/public/css/gestionPrestamosStyles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css" />
+    <style>
+        @font-face {
+            font-family: 'RedHatDisplay';
+            src: url('/public/fonts/RedHatDisplay-VariableFont_wght.ttf') format('truetype');
+        }
+        
+        body {
+            background-color: #ff0000;
+            font-family: 'RedHatDisplay';
+        }
+    </style>
 </head>
 <body>
-    <form id="check-multas-form">
-        <label for="rut">RUT:</label>
-        <input type="text" id="rut" name="rut">
-        <button type="submit">Check Multas</button>
-    </form>
-    <div id="multas-result"></div>
-
-    <form id="check-retraso-form">
-        <label for="rut-retraso">RUT:</label>
-        <input type="text" id="rut-retraso" name="rut-retraso">
-        <button type="submit">Check Retraso</button>
-    </form>
-    <div id="retraso-result"></div>
-
-    <form id="calcular-multas-form">
-        <button type="submit">Calcular Multas</button>
-    </form>
-    <div id="calcular-result"></div>
-
-    <form id="pagar-multas-form">
-        <label for="rut-pago">RUT:</label>
-        <input type="text" id="rut-pago" name="rut-pago">
-        <button type="submit">Pagar Multas</button>
-    </form>
-    <div id="pago-result"></div>
-
-    <script src="/public/js/managers/gestionMultas.js"></script>
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="https://www.inacap.cl" target="_blank"><img src="/public/images/navbar.png" width="174" alt="inacap"></a>
+        </li>
+        <li>
+            <h3>Gestión de Multas</h3>
+        </li>
+        <% if (login) { %>
+            <li id="nav-item-dropdown" class="nav-item dropdown">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-white btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Tu Perfil
+                    </button>
+                    <div class="dropdown-menu text-center">
+                        <img src="/public/images/user.png" alt="imagen usuario" width="90" height="90">
+                        <a class="dropdown-item" href="#"><%= name %> <%= lastname %></a>
+                        <a class="dropdown-item" href="#"><%= email %></a>
+                        <hr class="dropdown-divider">
+                        <a class="dropdown-item" href="/login">Cerrar Sesión</a>
+                    </div>
+                </div>
+            </li>
+        <% } else { %>
+            <li id="nav-item-dropdown" class="nav-item dropdown">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-white btn-lg dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sesión no iniciada
+                    </button>
+                    <div class="dropdown-menu text-center">
+                        <a class="dropdown-item" href="/login">Iniciar Sesión</a>
+                    </div>
+                </div>
+            </li>
+        <% } %>
+    </ul>
+    <div class="container">
+        <div class="d-flex justify-content-between mb-3">
+            <div id="search">
+                <a href="/index"><img src="/public/images/back-arrow2.png" alt="atras" height="40" width="60"></a>
+                <select id="searchType" class="form-select d-inline-block w-auto">
+                    <option value="rut">Rut Usuario</option>
+                    <option value="prestamoID">Prestamo ID</option>
+                </select>
+                <input class="form-control me-2 d-inline-block w-auto" id="searchInput" type="search" placeholder="Buscar" onkeyup="searchMultas()" aria-label="Search">
+            </div>
+        </div>
+        <hr>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Prestamo ID</th>
+                    <th scope="col">Rut</th>
+                    <th scope="col">Monto</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha Pago</th>
+                    <th scope="col">Dias Atraso Totales</th>
+                </tr>
+            </thead>
+            <tbody id="deudasTabla">
+                <% multas.forEach(deuda => { %>
+                    <tr>
+                        <td><%= deuda.MultaID %></td>
+                        <td><%= deuda.Prestamos_PrestamoID %></td>
+                        <td><%= deuda.Prestamos.Usuario_Rut %></td>
+                        <td><%= deuda.Deuda %></td>
+                        <td><%= deuda.Estado_Multa %></td>
+                        <td><%= new Date(deuda.Fecha_Pago).toLocaleDateString('es-CL') %></td>
+                        <td><%= deuda.Dias_Atraso %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        <nav>
+            <ul id="footer" class="pagination justify-content-between">
+                <li class="page-item"><a class="link-secondary link-offset-2 link-opacity-50 link-underline-opacity-0 link-underline-opacity-100-hover" href="#" onclick="previousPage()"><strong>Anterior</strong></a></li>
+                <li class="page-item"><strong><a class="page-link link-secondary link-offset-2 link-opacity-50 link-underline-opacity-0 link-underline-opacity-100-hover" href="#">1-1 de 1</a></strong></li>
+                <li class="page-item"><a class="link-secondary link-offset-2 link-opacity-50 link-underline-opacity-0 link-underline-opacity-100-hover" href="#" onclick="nextPage()"><strong>Siguiente</strong></a></li>
+            </ul>
+        </nav>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+    <script src="/public/js/managers/manageDeudas.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+    </script>
 </body>
 </html>
