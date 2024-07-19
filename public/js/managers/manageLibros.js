@@ -157,6 +157,29 @@ function deleteLibro(libroID) {
     });
 }
 
+function deactivateLibro(libroID) {
+    alertify.confirm('Desactivar Libro', '¿Estás seguro de que deseas desactivar este libro?', function () {
+        fetch(`/api/libros/${libroID}/desactivar`, {
+            method: 'PATCH',
+        })
+            .then(response => {
+                if (response.ok) {
+                    const libro = libros.find(libro => libro.LibroID === libroID);
+                    if (libro) {
+                        libro.Estado = 'Desactivado';
+                        renderTable();
+                        alertify.success('Libro desactivado con éxito');
+                    }
+                } else {
+                    alertify.error('Error desactivando el libro');
+                }
+            })
+            .catch(error => console.error('Error desactivando libro:', error));
+    }, function () {
+        alertify.error('Cancelado');
+    });
+}
+
 function updatePagination() {
     const totalPages = Math.ceil(libros.length / itemsPerPage);
     const footer = document.getElementById('footer');

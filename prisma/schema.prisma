@@ -72,6 +72,7 @@ model Libro {
   Editorial           String
   Ano_Publicacion     Int
   Copias              Int
+  Estado              String @default("Activo")
   BibliotecaID        Int
   Biblioteca          Biblioteca @relation(fields: [BibliotecaID], references: [BibliotecaID])
   DetallePrestamos    DetallePrestamo[]

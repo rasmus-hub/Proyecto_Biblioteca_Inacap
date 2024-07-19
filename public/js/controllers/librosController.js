@@ -111,10 +111,36 @@ const deleteLibro = async (req, res) => {
     }
 };
 
+// Desactivar un libro
+const deactivateLibro = async (req, res) => {
+    const { libroID } = req.params;
+
+    try {
+        const libro = await prisma.libro.findFirst({
+            where: { LibroID: parseInt(libroID) }
+        });
+
+        if (libro) {
+            const libroDesactivado = await prisma.libro.update({
+                where: { LibroID: parseInt(libroID) },
+                data: { Estado: 'Desactivado' }
+            });
+
+            res.json(libroDesactivado);
+        } else {
+            res.status(404).json({ message: 'Libro no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error desactivando libro:', error);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+};
+
 module.exports = {
     renderGestionLibros,
     getLibros,
     createLibro,
     updateLibro,
     deleteLibro,
+    deactivateLibro
 };

@@ -44,10 +44,13 @@ router.post('/api/detallePrestamos', prestamosController.addDetallePrestamo);
 router.put('/api/prestamos/:id', prestamosController.updatePrestamo);
 router.delete('/api/prestamos/:id', prestamosController.deletePrestamo);
 router.get('/api/prestamos/:id', prestamosController.getDetallePrestamosForPrestamo);
+router.get('/api/prestamos/:id', prestamosController.getPrestamoID);
+
+// Ruta para el reporte de prestamos
+router.get('/api/reportePrestamos', prestamosController.getReportePrestamos);
 
 // Rutas Detalle Prestamos
-router.get('/detallePrestamos', prestamosController.renderDetallePrestamos);
-router.get('/api/detallePrestamos', prestamosController.getDetallePrestamos);
+router.post('/api/detallePrestamo', prestamosController.addNewDetallePrestamo);
 
 // Rutas Buscador Usuarios
 router.get('/buscadorUsuarios/:rut', usuariosController.renderBuscadorUsuarios);
@@ -66,5 +69,6 @@ router.get('/api/libros', librosController.getLibros);
 router.post('/api/libros', librosController.createLibro);
 router.put('/api/libros/:libroID', librosController.updateLibro);
 router.delete('/api/libros/:libroID', librosController.deleteLibro);
+router.put('/api/libros/deactivate/:libroID')
 
 module.exports = router;

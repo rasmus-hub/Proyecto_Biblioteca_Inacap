@@ -92,11 +92,18 @@
                         <td><%= libro.Editorial %></td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="updateLibro(<%= libro.LibroID %>)">Actualizar</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteLibro(<%= libro.LibroID %>)">Eliminar</button>
+                            <!--
+                            <% if (libro.Estado === 'Activo') { %>
+                                <button class="btn btn-warning btn-sm" onclick="deactivateLibro(<%= libro.LibroID %>)">Dar de Baja</button>
+                            <% } else { %>
+                                <button class="btn btn-secondary btn-sm" disabled>Inactivo</button>
+                            <% } %>
+                            -->
                         </td>
                     </tr>
                 <% }); %>
             </tbody>
+            
         </table>
         <nav>
             <ul id="footer" class="pagination justify-content-between">

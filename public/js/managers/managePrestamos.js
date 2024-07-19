@@ -150,6 +150,91 @@ async function addDetallePrestamo(prestamoID, index) {
     });
 }
 
+async function insertarDetallePrestamo() {
+    const prestamoID = prompt("Ingrese el ID del préstamo:");
+    const libroID = prompt("Ingrese el ID del libro a agregar:");
+
+    if (!prestamoID || !libroID) {
+        alertify.error("Debe ingresar ambos ID.");
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/detallePrestamo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prestamoID: parseInt(prestamoID),
+                libro_id: parseInt(libroID),
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alertify.success("Detalle de préstamo agregado con éxito.");
+            // Actualizar la tabla de detalles de préstamos
+            actualizarTablaDetalles(data);
+            // Actualizar la cantidad de libros en la tabla de préstamos
+            actualizarCantidadLibrosPrestamo(prestamoID);
+        } else {
+            alertify.error(data.error);
+        }
+    } catch (error) {
+        console.error('Error al agregar el detalle del préstamo:', error);
+        alertify.error('Error al agregar el detalle del préstamo');
+    }
+}
+
+function actualizarTablaDetalles(detalle) {
+    const tabla = document.getElementById('detallePrestamoTabla');
+    const nuevaFila = document.createElement('tr');
+
+    nuevaFila.innerHTML = `
+        <td>${detalle.Prestamos_PrestamoID}</td>
+        <td>${detalle.Libro_LibroID}</td>
+        <td>${new Date(detalle.Fecha_Devolucion).toLocaleDateString('es-CL')}</td>
+        <td>${detalle.Estado_Detalle}</td>
+    `;
+
+    tabla.appendChild(nuevaFila);
+}
+
+async function actualizarCantidadLibrosPrestamo(prestamoID) {
+    try {
+        const response = await fetch(`/api/prestamos/${prestamoID}`);
+        const prestamo = await response.json();
+
+        if (response.ok) {
+            // Obtener todas las filas de la tabla de préstamos
+            const filasPrestamos = document.querySelectorAll('#prestamoTabla tbody tr');
+
+            // Iterar sobre las filas para encontrar el préstamo con el ID correspondiente
+            let filaEncontrada = null;
+            filasPrestamos.forEach(fila => {
+                const idPrestamo = fila.querySelector('td:first-child').innerText.trim();
+                if (idPrestamo === prestamoID.toString()) {
+                    filaEncontrada = fila;
+                }
+            });
+
+            if (filaEncontrada) {
+                // Actualizar la columna de Cantidad de Libros
+                filaEncontrada.querySelector('td:nth-child(4)').innerText = prestamo.Cantidad_Libros;
+            } else {
+                alertify.error('No se encontró la fila del préstamo en la tabla');
+            }
+        } else {
+            alertify.error('Error al actualizar la cantidad de libros del préstamo');
+        }
+    } catch (error) {
+        console.error('Error al actualizar la cantidad de libros del préstamo:', error);
+        alertify.error('Error al actualizar la cantidad de libros del préstamo');
+    }
+}
+
 function updatePrestamo(prestamoID) {
     alertify.dialog('prompt').set({
         labels: { ok: 'Actualizar', cancel: 'Cancelar' },
@@ -246,6 +331,52 @@ function renderFilteredTable(filteredPrestamos) {
     });
 
     updatePagination(filteredPrestamos.length);
+}
+
+function generarReporte() {
+    const fecha = document.getElementById('reporteFecha').value;
+    const tipoUsuario = document.getElementById('reporteTipoUsuario').value;
+
+    fetch(`/api/reportePrestamos?fecha=${fecha}&tipoUsuario=${tipoUsuario}`)
+        .then(response => response.json())
+        .then(data => {
+            mostrarReporte(data);
+        })
+        .catch(error => console.error('Error generating report:', error));
+}
+
+function mostrarReporte(data) {
+    const reporteDiv = document.createElement('div');
+    reporteDiv.innerHTML = `
+        <div class="tabla-modal">
+            <h5>Reporte de Préstamos</h5>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Rut</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Cantidad Libros</th>
+                        <th scope="col">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(prestamo => `
+                        <tr>
+                            <td>${prestamo.PrestamoID}</td>
+                            <td>${prestamo.Usuario.Rut}</td>
+                            <td>${new Date(prestamo.Fecha_Prestamo).toLocaleDateString('es-CL')}</td>
+                            <td>${prestamo.Cantidad_Libros}</td>
+                            <td>${prestamo.Estado_Prestamo}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    document.body.appendChild(reporteDiv);
+    const modal = bootstrap.Modal.getInstance(document.getElementById('reporteModal'));
+    modal.hide();
 }
 
 function updatePagination(filteredCount) {
